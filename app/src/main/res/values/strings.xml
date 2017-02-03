@@ -3,4 +3,6 @@
     <string name="et_login">Usuario/Matricula</string>
     <string name="et_password">Contraseña</string>
     <string name="btn_iniciar_sesion">Iniciar sesión</string>
+    <string name="error_cerrar_recurso">Error #C8CR</string>
+    <string name="error_pulsando_vista">Estaría bien saber el botón que has pulsado...</string>
 </resources>
