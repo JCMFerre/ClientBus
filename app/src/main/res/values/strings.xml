@@ -5,4 +5,8 @@
     <string name="btn_iniciar_sesion">Iniciar sesión</string>
     <string name="error_cerrar_recurso">Error #C8CR</string>
     <string name="error_pulsando_vista">Estaría bien saber el botón que has pulsado...</string>
+    <string name="msj_inicio_correcto">Inicio de sessión correcto.</string>
+    <string name="msj_inicio_incorrecto">Inicio de sessión incorrecto.</string>
+    <string name="campo_login_error">La matrícula es requerida.</string>
+    <string name="campo_contrasena_error">La contraseña es requerida.</string>
 </resources>

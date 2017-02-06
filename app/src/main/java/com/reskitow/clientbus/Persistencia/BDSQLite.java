@@ -13,6 +13,7 @@ import com.reskitow.clientbus.R;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class BDSQLite extends SQLiteOpenHelper {
 
@@ -41,7 +42,6 @@ public class BDSQLite extends SQLiteOpenHelper {
         for (String query : querys) {
             sqLiteDatabase.execSQL(query);
         }
-        sqLiteDatabase.close();
     }
 
     @Override
@@ -51,29 +51,26 @@ public class BDSQLite extends SQLiteOpenHelper {
     }
 
     public boolean anadirAutobus(Autobus autobus) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        long resultado = db.insert(TABLA_USUARIOS, null, crearContentValuesAutobus(autobus));
-        cerrarRecursos(new Closeable[]{db});
+        long resultado = getWritableDatabase().insert(TABLA_USUARIOS, null, crearContentValuesAutobus(autobus));
         // Si ocurre algun error devuelve -1.
         return resultado != -1;
     }
 
-    public Autobus[] getTotsElsAutobus() {
-        ArrayList<Autobus> autobusos = new ArrayList<>();
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLA_USUARIOS, null);
+    /*public List<Autobus> getTotsElsAutobus() {
+        List<Autobus> autobusos = new ArrayList<>();
+        Cursor cursor = getReadableDatabase().rawQuery("SELECT * FROM " + TABLA_USUARIOS, null);
         if (cursor.moveToNext()) {
             do {
                 autobusos.add(obtenerAutobusCursor(cursor));
             } while (cursor.moveToNext());
         }
-        return (Autobus[]) autobusos.toArray();
+        return autobusos;
     }
 
     private Autobus obtenerAutobusCursor(Cursor cursor) {
         return new Autobus(cursor.getString(cursor.getColumnIndex(KEY_MATRICULA_USUARIOS)),
                 cursor.getString(cursor.getColumnIndex(KEY_CONTRASENA_USUARIOS)));
-    }
+    }*/
 
     private ContentValues crearContentValuesAutobus(Autobus autobus) {
         ContentValues contentValues = new ContentValues();
@@ -83,24 +80,10 @@ public class BDSQLite extends SQLiteOpenHelper {
     }
 
     public boolean getValidacionSesion(Autobus autobus) {
-        String query = "SELECT * FROM " + TABLA_USUARIOS + " WHERE " + KEY_MATRICULA_USUARIOS
-                + " = ? AND " + KEY_CONTRASENA_USUARIOS + " = ?";
+        String query = "SELECT * FROM " + TABLA_USUARIOS + " WHERE UPPER(" + KEY_MATRICULA_USUARIOS
+                + ") = ? AND " + KEY_CONTRASENA_USUARIOS + " = ?";
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery(query, new String[]{autobus.getMatricula(), autobus.getContrasena()});
-        int numColumnas = cursor.getCount();
-        cerrarRecursos(new Closeable[]{cursor, db});
-        return numColumnas > 0;
+        Cursor cursor = db.rawQuery(query, new String[]{autobus.getMatricula().toUpperCase(), autobus.getContrasena()});
+        return cursor.getCount() > 0;
     }
-
-    private void cerrarRecursos(Closeable[] closeables) {
-        for (Closeable closeable : closeables) {
-            try {
-                closeable.close();
-            } catch (IOException e) {
-                Toast.makeText(context, context.getString(R.string.error_cerrar_recurso), Toast.LENGTH_LONG).show();
-                break;
-            }
-        }
-    }
-
 }
