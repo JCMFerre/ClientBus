@@ -9,4 +9,35 @@
     <string name="msj_inicio_incorrecto">Inicio de sessión incorrecto.</string>
     <string name="campo_login_error">La matrícula es requerida.</string>
     <string name="campo_contrasena_error">La contraseña es requerida.</string>
+    <string name="menu_ajustes">Ajustes</string>
+    <string name="preferencias_titulo_servidor">Configuración del servidor</string>
+    <string name="key_ip_servidor" translatable="false">prefs_ip_servidor</string>
+    <string name="descripcion_ip_servidor">Introduce la ip del servidor Rest.</string>
+    <string name="titulo_ip_servidor">IP Servidor REST</string>
+    <string name="preferencias_acerca_de">Acerca de</string>
+    <string name="descripcion_acerca_de">Diseño y código por Joan Creus Martin.</string>
+    <string name="titulo_acerca_de">Información</string>
+    <string name="titulo_tarea_asincrona">Cargando...</string>
+    <string name="hint_ip">Ej. 192.168.1.12</string>
+    <string name="error_ip_incorrecta">Parece que la ip del servidor no esta introducida o esta mal formada.\\nIntroduce una ip correcta.</string>
+    <string name="error_introducir_ip">Introduce una IP para el servidor.</string>
+    <string name="alert_aceptar">Aceptar</string>
+    <string name="activity_configuracion_nombre">Configuración</string>
+    <string name="error_rest">Ha ocurrido un error con el servidor Rest\nAsegurate que esta bien configurado.</string>
+    <string name="key_id_sesion">prefs_id_sesion</string>
+    <string name="error_al_iniciar_sesion">No se ha iniciado sesión correctamente.</string>
+    <string name="sesion_cerrar_titulo">Cerrando sesión...</string>
+    <string name="mensaje_sesion_dialog">Esperando respuesta del servidor Rest...</string>
+    <string name="info_sesion_actual">ID Sesión actual:</string>
+    <string name="btn_cerrar_sesion">Cerrar sesión</string>
+    <array name="info_tarea_asincrona">
+        <item>Inicializando tarea en segundo plano</item>
+        <item>Creando conexión con el servidor Rest</item>
+        <item>Construyendo información para enviar al servidor Rest.</item>
+        <item>Enviando petición al servidor Rest.</item>
+        <item>Esperando respuesta del servidor Rest.</item>
+        <item>Error a la hora de acceder al servidor Rest.</item>
+        <item>Comprobando con la base de datos local</item>
+        <item>Completando...</item>
+    </array>
 </resources>
