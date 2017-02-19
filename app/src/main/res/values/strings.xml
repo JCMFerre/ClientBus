@@ -27,9 +27,14 @@
     <string name="key_id_sesion">prefs_id_sesion</string>
     <string name="error_al_iniciar_sesion">No se ha iniciado sesión correctamente.</string>
     <string name="sesion_cerrar_titulo">Cerrando sesión...</string>
-    <string name="mensaje_sesion_dialog">Esperando respuesta del servidor Rest...</string>
+    <string name="mensaje_sesion_dialog">Esperando respuesta del servidor Rest...\n(Puede tardar incluso unos minutos, sea paciente)</string>
     <string name="info_sesion_actual">ID Sesión actual:</string>
     <string name="btn_cerrar_sesion">Cerrar sesión</string>
+    <string name="txt_info_sesion">Información sesión actual</string>
+    <string name="txt_info_inicio">Inicio de sesión</string>
+    <string name="info_permisos_txt">* Debes aceptar los permisos de localización para poder utilizar el servicio de localización. Pulsa sobre este texto para solicitarloss.</string>
+    <string name="activity_sesion">Sesión</string>
+    <string name="info_toast_servicio_disabled">El servicio se ha detenido porque se ha deshabilitado el proveedor de localizaciones.</string>
     <array name="info_tarea_asincrona">
         <item>Inicializando tarea en segundo plano</item>
         <item>Creando conexión con el servidor Rest</item>

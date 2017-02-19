@@ -3,6 +3,7 @@
     package="com.reskitow.clientbus">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
         android:allowBackup="true"
@@ -20,7 +21,14 @@
         <activity
             android:name=".Control.PreferenciasActivity"
             android:label="@string/activity_configuracion_nombre" />
-        <activity android:name=".Control.SesionActivity"></activity>
+        <activity
+            android:name=".Control.SesionActivity"
+            android:label="@string/activity_sesion" />
+
+        <service
+            android:name=".Servicios.GeolocalizacionService"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>

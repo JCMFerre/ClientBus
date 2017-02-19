@@ -1,12 +1,15 @@
 package com.reskitow.clientbus.Control;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.design.widget.TextInputLayout;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -14,11 +17,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.reskitow.clientbus.Model.Autobus;
 import com.reskitow.clientbus.Persistencia.BDSQLite;
 import com.reskitow.clientbus.R;
+import com.reskitow.clientbus.Servicios.GeolocalizacionService;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -33,7 +38,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private static final Pattern PATTERN_IP = Pattern.compile(
             "^(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])$");
+    private static final int PETICION_PERMISO_LOCALIZACION = 33;
 
+    private TextView txtInfoPermisos;
     private EditText etMatricula;
     private EditText etContrasena;
     private Button botonInicioSesion;
@@ -57,16 +64,36 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    private void lanzarSesion() {
-        startActivity(new Intent(this, SesionActivity.class));
-        finish();
-    }
-
     private void comprobarIp() {
         String ip = obtenerIpPrefs();
         if (ip == null || !isIPCorrecta(ip)) {
             lanzarPrefs();
         }
+    }
+
+    private void inicializarGestorBD() {
+        bdsqLite = new BDSQLite(this);
+    }
+
+    private void lanzarSesion() {
+        startActivity(new Intent(this, SesionActivity.class));
+        finish();
+    }
+
+    private void lanzarPrefs() {
+        startActivity(new Intent(this, PreferenciasActivity.class));
+    }
+
+    private void inicializarEventos() {
+        botonInicioSesion.setOnClickListener(this);
+        txtInfoPermisos.setOnClickListener(this);
+    }
+
+    private void findViews() {
+        etMatricula = (EditText) findViewById(R.id.et_login);
+        etContrasena = (EditText) findViewById(R.id.et_password);
+        botonInicioSesion = (Button) findViewById(R.id.btn_login);
+        txtInfoPermisos = (TextView) findViewById(R.id.info_permisos);
     }
 
     @Override
@@ -89,29 +116,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return retorno;
     }
 
-    private void lanzarPrefs() {
-        startActivity(new Intent(this, PreferenciasActivity.class));
-    }
-
-    private void inicializarEventos() {
-        botonInicioSesion.setOnClickListener(this);
-    }
-
-    private void inicializarGestorBD() {
-        bdsqLite = new BDSQLite(this);
-    }
-
-    private void findViews() {
-        etMatricula = (EditText) findViewById(R.id.et_login);
-        etContrasena = (EditText) findViewById(R.id.et_password);
-        botonInicioSesion = (Button) findViewById(R.id.btn_login);
-    }
-
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.btn_login:
                 comprobarCampos();
+                break;
+            case R.id.info_permisos:
+                solicitarPermisos();
                 break;
             default:
                 break;
@@ -119,15 +131,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void comprobarCampos() {
-        if (validarCampo(R.id.et_login_encap, etMatricula, getString(R.string.campo_login_error)) &
-                validarCampo(R.id.et_password_encap, etContrasena, getString(R.string.campo_contrasena_error))) {
+        if (validarCampo(R.id.login_error, etMatricula) &
+                validarCampo(R.id.contrasena_error, etContrasena)) {
             iniciarSesion();
         }
     }
 
-    private boolean validarCampo(int id, EditText editText, String campoError) {
+    private boolean validarCampo(int id, EditText editText) {
         boolean campoVacio = editText.getText().toString().isEmpty();
-        ((TextInputLayout) findViewById(id)).setError(campoVacio ? campoError : null);
+        (findViewById(id)).setVisibility(campoVacio ? View.VISIBLE : View.GONE);
         return !campoVacio;
     }
 
@@ -136,7 +148,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private Autobus obtenerAutobusPorCampos() {
-        return new Autobus(etMatricula.getText().toString(), etContrasena.getText().toString());
+        return new Autobus(etMatricula.getText().toString(), etContrasena.getText().toString(), false);
     }
 
     private boolean isIPCorrecta(String ip) {
@@ -145,15 +157,46 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void validarSesion(Boolean correcto) {
         if (correcto) {
-            SharedPreferences preferencias = PreferenceManager.getDefaultSharedPreferences(this);
-            SharedPreferences.Editor editor = preferencias.edit();
-            editor.putString(getString(R.string.key_id_sesion), calcularIdSesion(obtenerAutobusPorCampos().getMatricula().toUpperCase()));
-            // INICIAR SERVICIO CON GEOLOCALIZACION
-            editor.commit();
-            lanzarSesion();
+            if (ActivityCompat.checkSelfPermission(this,
+                    Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                solicitarPermisos();
+            } else {
+                permisosCorrectoLanzarTodo();
+            }
         } else {
             Toast.makeText(this, getString(R.string.error_al_iniciar_sesion), Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void solicitarPermisos() {
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                PETICION_PERMISO_LOCALIZACION);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == PETICION_PERMISO_LOCALIZACION) {
+            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                permisosCorrectoLanzarTodo();
+                txtInfoPermisos.setVisibility(View.GONE);
+            } else {
+                txtInfoPermisos.setVisibility(View.VISIBLE);
+            }
+        }
+    }
+
+    private void permisosCorrectoLanzarTodo() {
+        SharedPreferences preferencias = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = preferencias.edit();
+        editor.putString(getString(R.string.key_id_sesion), calcularIdSesion(obtenerAutobusPorCampos().getMatricula().toUpperCase()));
+        editor.commit();
+        lanzarServicio();
+        lanzarSesion();
+    }
+
+    private void lanzarServicio() {
+        startService(new Intent(this, GeolocalizacionService.class));
     }
 
     private String obtenerIdSesion() {

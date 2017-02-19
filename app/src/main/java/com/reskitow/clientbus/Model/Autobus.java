@@ -1,17 +1,18 @@
 package com.reskitow.clientbus.Model;
 
-/**
- * Created by ALUMNEDAM on 03/02/2017.
- */
-
 public class Autobus {
 
     private String matricula;
     private String contrasena;
+    private boolean activo;
 
-    public Autobus(String matricula, String contrasena) {
+    public Autobus(String matricula, String contrasena, boolean activo) {
         this.matricula = matricula;
         this.contrasena = contrasena;
+        this.activo = activo;
+    }
+
+    public Autobus() {
     }
 
     public String getMatricula() {
@@ -30,11 +31,16 @@ public class Autobus {
         this.contrasena = contrasena;
     }
 
+    public boolean isActivo() {
+        return activo;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
+    }
+
     @Override
     public String toString() {
-        return "Autobus{" +
-                "matricula='" + matricula + '\'' +
-                ", contrasena='" + contrasena + '\'' +
-                '}';
+        return "Autobus{" + "matricula=" + matricula + ", contrasena=" + contrasena + ", activo=" + activo + '}';
     }
 }

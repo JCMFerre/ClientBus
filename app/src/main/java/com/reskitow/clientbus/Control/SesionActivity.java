@@ -15,6 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.reskitow.clientbus.R;
+import com.reskitow.clientbus.Servicios.GeolocalizacionService;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -87,14 +88,13 @@ public class SesionActivity extends AppCompatActivity implements View.OnClickLis
 
     private void cerrarSesion(Boolean resultado) {
         if (resultado) {
+            stopService(new Intent(this, GeolocalizacionService.class));
             quitarIdSesionPreferencias();
-            // PARAR SERVICIO Y TAL;
             startActivity(new Intent(this, MainActivity.class));
             finish();
         } else {
             Toast.makeText(this, getString(R.string.error_rest), Toast.LENGTH_LONG).show();
         }
-
     }
 
     private void quitarIdSesionPreferencias() {

@@ -5,27 +5,49 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
     tools:context="com.reskitow.clientbus.Control.SesionActivity">
 
     <TextView
-        android:id="@+id/txt_matricula_sesion"
+        android:id="@+id/textView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:padding="8dp" />
+        android:padding="16dp"
+        android:text="@string/txt_info_sesion"
+        android:textSize="17sp" />
 
-    <TextView
-        android:id="@+id/txt_id_sesion"
+    <android.support.v7.widget.CardView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:padding="8dp" />
+        android:layout_height="wrap_content">
 
-    <Button
-        android:id="@+id/btn_cerrar_sesion"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="@string/btn_cerrar_sesion" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/txt_matricula_sesion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:padding="8dp" />
+
+            <TextView
+                android:id="@+id/txt_id_sesion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:padding="8dp" />
+
+            <Button
+                android:id="@+id/btn_cerrar_sesion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/btn_cerrar_sesion" />
+        </LinearLayout>
+
+    </android.support.v7.widget.CardView>
+
 </LinearLayout>
