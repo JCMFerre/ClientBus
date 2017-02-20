@@ -132,20 +132,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return true;
     }
 
+    /**
+     * Listener de los botones del menú, lanza preferencias.
+     *
+     * @param item Item pulsado.
+     * @return
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        boolean retorno = true;
         switch (item.getItemId()) {
             case R.id.btn_menu_ajustes:
                 lanzarPrefs();
                 break;
             default:
-                retorno = super.onOptionsItemSelected(item);
                 break;
         }
-        return retorno;
+        return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Listener de las vistas, R.id.info_permisos, pide los permisos en tiempo de ejecución y el R.id.btn_login
+     * llama a comprobarCampos().
+     *
+     * @param view vista pulsada.
+     */
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
@@ -174,7 +184,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * Valida el campo en caso de estar vacío, si es incorrecto pone la vista con el id que se le
      * pasa por parámetro a visible, si no la oculta.
      *
-     * @param id ID de la vista con el mensaje de error.
+     * @param id       ID de la vista con el mensaje de error.
      * @param editText EditText a comprobar.
      * @return true si el campo no esta vacío o falso en caso contrario.
      */
@@ -184,18 +194,40 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return !campoVacio;
     }
 
+    /**
+     * Lanza la tarea asíncrona con el autobús a comprobar.
+     */
     private void iniciarSesion() {
         new InicioSesion().execute(obtenerAutobusPorCampos());
     }
 
+    /**
+     * Crea un objeto de tipo Autobus, con los campos de los EditText.
+     *
+     * @return objeto creado.
+     */
     private Autobus obtenerAutobusPorCampos() {
         return new Autobus(etMatricula.getText().toString(), etContrasena.getText().toString(), false);
     }
 
+    /**
+     * Comprueba si la ip es correcta (IP v4).
+     *
+     * @param ip Ip a comprobar.
+     * @return Devuelve true si está bien formada y false al revés.
+     */
     private boolean isIPCorrecta(String ip) {
         return PATTERN_IP.matcher(ip).matches();
     }
 
+    /**
+     * Método llamado desde la tarea asíncrona, que comprueba los permisos de la APP, si no están aceptados,
+     * llama al método solicitarPermisos(), si no llama a permisosCorrectoLanzarTodo().
+     * <p>
+     * Si el inicio de sesión no ha sido correcto muestra un Toast informando de la situación.
+     *
+     * @param correcto Si el inicio a sido correcto.
+     */
     private void validarSesion(Boolean correcto) {
         if (correcto) {
             if (ActivityCompat.checkSelfPermission(this,
@@ -209,12 +241,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    /**
+     * Solicita los permisos de localización, el método onRequestPermissionResult, será llamado cuando
+     * el usuario acepte o decline con los resultados..
+     */
     private void solicitarPermisos() {
         ActivityCompat.requestPermissions(this,
                 new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                 PETICION_PERMISO_LOCALIZACION);
     }
 
+    /**
+     * Método al cual es llamado cuando el usuario acepta o declina los permisos, si son aceptados por
+     * el usuario, llama a permisosCorrectoLanzarTodo y oculta la vista con el texto informando de los
+     * permisos, si no son aceptados, el TextView sigue ahí para que el usuario pueda volver a ver el Dialog
+     * que pide los permisos en tiempo de ejecución.
+     *
+     * @param requestCode  Este parámetro deberá ser como PETICION_PERMISO_LOCALIZACION en este caso..
+     * @param permissions  permisos solicitados.
+     * @param grantResults resultado de los permisos solicitados, PackageManager.PERMISSION_GRANTED == Aceptados.
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == PETICION_PERMISO_LOCALIZACION) {
@@ -227,6 +273,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    /**
+     * Guarda en las preferencias el ID de sesión que calcula el método calcularIdSesion,
+     * lanza el servicio (lanzarServicio()) y la activity SesionActivity (lanzarSesion()).
+     */
     private void permisosCorrectoLanzarTodo() {
         SharedPreferences preferencias = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = preferencias.edit();
@@ -236,10 +286,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         lanzarSesion();
     }
 
+    /**
+     * Lanza el servicio GeolocalizacionService.
+     */
     private void lanzarServicio() {
         startService(new Intent(this, GeolocalizacionService.class));
     }
 
+    /**
+     * Obtener el ID de sesión, devuelve null si no existe.
+     *
+     * @return ID de sesión o null.
+     */
     private String obtenerIdSesion() {
         return PreferenceManager.getDefaultSharedPreferences(MainActivity.this)
                 .getString(MainActivity.this.getString(R.string.key_id_sesion), null);
@@ -264,6 +322,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .getString(MainActivity.this.getString(R.string.key_ip_servidor), null);
     }
 
+    /**
+     * Calcula el ID de sesión con el formato siguiente: diaMesAñoHoraMinutoSegundosMilisegundosMatricula,
+     * ej. 3292CSP1902201715112322.
+     * <p>
+     * La fecha se calcula en el momento de ejecutar este método y la matrícula es la que le pasan por parámetro.
+     *
+     * @param matricula
+     * @return ID de sesión calculado.
+     */
     private String calcularIdSesion(String matricula) {
         return new StringBuilder(23)
                 .append(matricula)
@@ -271,6 +338,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .toString();
     }
 
+    /**
+     * Clase que gestiona la tarea asíncrona y obtiene la validación de sesión.
+     */
     private class InicioSesion extends AsyncTask<Autobus, Integer, Boolean> {
 
         private ProgressDialog progressDialog;
@@ -278,6 +348,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         private String ipServidor;
         private String puerto;
 
+        /**
+         * Método que se ejecuta en el hilo principal, aquí seteamos los atributos a nuestro gusto
+         * y se aprovecha para mostrar una vista mientras realiza la tarea.
+         */
         @Override
         protected void onPreExecute() {
             informacionProgressBar = MainActivity.this.getResources().getStringArray(R.array.info_tarea_asincrona);
@@ -291,6 +365,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             puerto = MainActivity.this.obtenerPuertoPrefs();
         }
 
+        /**
+         * Método el cual se ejecuta en segundo plano, si queremos mostrar algo por el hilo principal
+         * habría que llamar a publishProgress que este llama al onProgresUpdate. Aquí recuperamos la
+         * validación de sesión.
+         * <p>
+         * No se utilizan métodos ni clases @Deprecated, se utiliza HttpURLConnection y para formar
+         * la URL SringBuffer porque al estar manejando varios hilos que sea sincronizado.
+         *
+         * @param params Autobús, con matrícula y contraseña para validar.
+         * @return true si ha sido posible iniciar sesión (Cambia el estado de la BD externa a activo 'S') o false si no
+         * ha sido posible o a ocurrido algún error.
+         */
         @Override
         protected Boolean doInBackground(Autobus... params) {
             boolean correcto = false;
@@ -324,6 +410,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             return correcto;
         }
 
+        /**
+         * Método que se ejecuta en el hilo principal, y si le llega un -33 significa que ha entrado en un catch,
+         * así que mostraremos un Toast de error, si no, vamos mostrando el proceso de la tarea.
+         *
+         * @param values Índice del array de String's o -33 en caso de error.
+         */
         @Override
         protected void onProgressUpdate(Integer... values) {
             if (values[0] == -33) {
@@ -333,6 +425,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
 
+        /**
+         * Método que se ejecuta después del doInBackground, le llega el resultado en forma de boolean que devuelve
+         * el método anterior mencionado, ocultamos las vistas que salían mientras cargaba.
+         * <p>
+         * Llama al método validarSesion enviándole el resultado de inicio de sesión.
+         *
+         * @param result Resultado obtenido del inicio de sesión, true si es correcto, false en caso contrario.
+         */
         @Override
         protected void onPostExecute(Boolean result) {
             progressDialog.setMessage(informacionProgressBar[informacionProgressBar.length - 1]);
