@@ -4,9 +4,9 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -38,38 +38,58 @@ public class SesionActivity extends AppCompatActivity implements View.OnClickLis
         inicializarEventos();
     }
 
+    /**
+     * Inicializa el evento OnClickListener del btnCerrarSesion.
+     */
     private void inicializarEventos() {
         btnCerrarSesion.setOnClickListener(this);
     }
 
+    /**
+     * Muestra la info al usuario a través de TextView, obtiene el id de sesión de las preferencias,
+     * muestra el id de sesión y la matrícula haciendo idSesion.subString(0,7).
+     */
     private void mostrarInfoTextViews() {
         String idSesion = obtenerIdSesionPrefs();
         ((TextView) findViewById(R.id.txt_id_sesion)).setText(getString(R.string.info_sesion_actual) + " " + idSesion);
         ((TextView) findViewById(R.id.txt_matricula_sesion)).setText(getString(R.string.et_login) + ": " + idSesion.substring(0, 7));
     }
 
+    /**
+     * finViewById del botón de cerrar sesión.
+     */
     private void findViews() {
         btnCerrarSesion = (Button) findViewById(R.id.btn_cerrar_sesion);
     }
 
+    /**
+     * Infla el menú.
+     *
+     * @param menu
+     * @return
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_principal, menu);
         return true;
     }
 
+    /**
+     * Listener menú, el único botón lanza las preferencias.
+     *
+     * @param item
+     * @return
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        boolean retorno = true;
         switch (item.getItemId()) {
             case R.id.btn_menu_ajustes:
                 lanzarPrefs();
                 break;
             default:
-                retorno = super.onOptionsItemSelected(item);
                 break;
         }
-        return retorno;
+        return super.onOptionsItemSelected(item);
     }
 
     private void lanzarPrefs() {
@@ -105,6 +125,14 @@ public class SesionActivity extends AppCompatActivity implements View.OnClickLis
                 .getString(this.getString(R.string.key_id_sesion), null);
     }
 
+    /**
+     * Si ha sido posible cerrar sesión para el servicio GeolocalizacionService, quita el ID de sesión
+     * de las preferencias, inicia la activity principal MainActivity y finaliza esta.
+     * <p>
+     * Si no se ha cerrado sesión correctamente muestra un error en forma de Toast.
+     *
+     * @param resultado true si se ha cerrado sesión correctamente o false en caso contrario.
+     */
     private void cerrarSesion(Boolean resultado) {
         if (resultado) {
             stopService(new Intent(this, GeolocalizacionService.class));
@@ -116,6 +144,9 @@ public class SesionActivity extends AppCompatActivity implements View.OnClickLis
         }
     }
 
+    /**
+     * Quita el ID de sesión de las preferencias.
+     */
     private void quitarIdSesionPreferencias() {
         SharedPreferences preferencias = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = preferencias.edit();
@@ -123,6 +154,12 @@ public class SesionActivity extends AppCompatActivity implements View.OnClickLis
         editor.commit();
     }
 
+    /**
+     * Listener de los botones.
+     * El único botón llama al iniciarCierreSesion.
+     *
+     * @param v vista pulsada.
+     */
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -132,6 +169,9 @@ public class SesionActivity extends AppCompatActivity implements View.OnClickLis
         }
     }
 
+    /**
+     * Ejecuta la tarea asíncrona CerrarSesion.
+     */
     private void iniciarCierreSesion() {
         new CerrarSesion().execute();
     }
@@ -143,6 +183,10 @@ public class SesionActivity extends AppCompatActivity implements View.OnClickLis
         private String puerto;
         private ProgressDialog progressDialog;
 
+        /**
+         * Método que se ejecuta en el hilo principal, aquí seteamos los atributos a nuestro gusto
+         * y se aprovecha para mostrar una vista mientras realiza la tarea.
+         */
         @Override
         protected void onPreExecute() {
             progressDialog = ProgressDialog.show(SesionActivity.this,
@@ -153,6 +197,18 @@ public class SesionActivity extends AppCompatActivity implements View.OnClickLis
             puerto = SesionActivity.this.obtenerPuertoPrefs();
         }
 
+        /**
+         * Método el cual se ejecuta en segundo plano, si queremos mostrar algo por el hilo principal
+         * habría que llamar a publishProgress que este llama al onProgresUpdate. Aquí recuperamos la
+         * validación de sesión.
+         * <p>
+         * No se utilizan métodos ni clases @Deprecated, se utiliza HttpURLConnection y para formar
+         * la URL SringBuffer porque al estar manejando varios hilos que sea sincronizado.
+         *
+         * @param params
+         * @return true si ha sido posible cerrar sesión (Cambia el estado de la BD externa a activo 'N') o false si no
+         * ha sido posible o a ocurrido algún error.
+         */
         @Override
         protected Boolean doInBackground(Void... params) {
             boolean correcto = false;
@@ -182,6 +238,12 @@ public class SesionActivity extends AppCompatActivity implements View.OnClickLis
             return correcto;
         }
 
+        /**
+         * Método que se ejecuta en el hilo principal, y si le llega un -33 significa que ha entrado en un catch,
+         * así que mostraremos un Toast de error.
+         *
+         * @param values -33 en caso de error.
+         */
         @Override
         protected void onProgressUpdate(Integer... values) {
             if (values[0] == -33) {
@@ -189,6 +251,11 @@ public class SesionActivity extends AppCompatActivity implements View.OnClickLis
             }
         }
 
+        /**
+         * Quitamos el ProgressDialog con el método dismiss y llamamos al método cerrarSesion enviándole el resultado.
+         *
+         * @param resultado true si se ha cerrado sesión correctamente o false en caso contrario.
+         */
         @Override
         protected void onPostExecute(Boolean resultado) {
             progressDialog.dismiss();
