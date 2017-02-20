@@ -76,11 +76,30 @@ public class SesionActivity extends AppCompatActivity implements View.OnClickLis
         startActivity(new Intent(this, PreferenciasActivity.class));
     }
 
+    /**
+     * Obtiene la IP guardada en las preferencias.
+     *
+     * @return IP guardada.
+     */
     public String obtenerIpPrefs() {
         return PreferenceManager.getDefaultSharedPreferences(this)
                 .getString(this.getString(R.string.key_ip_servidor), null);
     }
 
+    /**
+     * Obtenemos el puerto del servidor de las preferencias, si no está seteado por defecto es 8080.
+     *
+     * @return Puerto del servidor.
+     */
+    private String obtenerPuertoPrefs() {
+        return PreferenceManager.getDefaultSharedPreferences(this).getString(getString(R.string.key_puerto_servidor), "8080");
+    }
+
+    /**
+     * Obtiene el ID de sesión guardado en las preferencias.
+     *
+     * @return ID de sesión guardado.
+     */
     public String obtenerIdSesionPrefs() {
         return PreferenceManager.getDefaultSharedPreferences(this)
                 .getString(this.getString(R.string.key_id_sesion), null);
@@ -121,23 +140,24 @@ public class SesionActivity extends AppCompatActivity implements View.OnClickLis
 
         private String ipServidor;
         private String idSesion;
+        private String puerto;
         private ProgressDialog progressDialog;
 
         @Override
         protected void onPreExecute() {
-            ipServidor = SesionActivity.this.obtenerIpPrefs();
-            idSesion = SesionActivity.this.obtenerIdSesionPrefs();
             progressDialog = ProgressDialog.show(SesionActivity.this,
                     SesionActivity.this.getString(R.string.sesion_cerrar_titulo),
                     SesionActivity.this.getString(R.string.mensaje_sesion_dialog));
+            ipServidor = SesionActivity.this.obtenerIpPrefs();
+            idSesion = SesionActivity.this.obtenerIdSesionPrefs();
+            puerto = SesionActivity.this.obtenerPuertoPrefs();
         }
 
         @Override
         protected Boolean doInBackground(Void... params) {
             boolean correcto = false;
-            StringBuffer stringBuffer = new StringBuffer().append("http://")
-                    .append(ipServidor)
-                    .append(":8080/ServicioRestAutobus/webresources/sesion");
+            StringBuffer stringBuffer = new StringBuffer().append("http://").append(ipServidor)
+                    .append(":").append(puerto).append("/ServicioRestAutobus/webresources/sesion");
             try {
                 JSONObject json = new JSONObject().put("matricula", idSesion.substring(0, 7)).put("contrasena", "noimportaesto").put("activo", false);
                 HttpURLConnection urlConnection = (HttpURLConnection) new URL(stringBuffer.toString()).openConnection();

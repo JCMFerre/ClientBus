@@ -3,10 +3,17 @@
 
     <PreferenceCategory android:title="@string/preferencias_titulo_servidor">
         <EditTextPreference
+            android:hint="@string/hint_ip"
             android:inputType="phone"
             android:key="@string/key_ip_servidor"
             android:summary="@string/descripcion_ip_servidor"
             android:title="@string/titulo_ip_servidor" />
+        <EditTextPreference
+            android:hint="@string/hint_puerto"
+            android:inputType="phone"
+            android:key="@string/key_puerto_servidor"
+            android:summary="@string/descripcion_puerto_servidor"
+            android:title="@string/tituli_puerto_servidor" />
     </PreferenceCategory>
     <PreferenceCategory
         android:persistent="false"

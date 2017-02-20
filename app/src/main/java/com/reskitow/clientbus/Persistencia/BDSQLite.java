@@ -15,6 +15,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Clase que gestiona la BD interna. En esta APP no se ha implementado, se a validado contra el servidor REST.
+ */
 public class BDSQLite extends SQLiteOpenHelper {
 
     // Nombre de la BD.
